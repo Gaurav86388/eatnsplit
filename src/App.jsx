@@ -21,9 +21,30 @@ import { useState } from 'react'
   },
 ];
 
-function FriendsList(){
-  const friends = initialFriends
+function FormSplitBill(){
+  return <form className="form-split-bill">
 
+    <h2>Split a bill with X</h2>
+    <label>💰 Bill value</label>
+      <input type="text" />
+
+      <label>🤦‍♂️ Your Expense</label>
+      <input type="text" />
+
+      <label>🤦‍♀️ X's Expense</label>
+      <input type="text" disabled/>
+
+    <label > 🤷‍♂️ Who is playing the bill?</label>
+
+    <select>
+      <option value="user">You</option>
+      <option value="friend">X</option>
+    </select>
+    <Button>Add Friend</Button>
+  </form>
+}
+
+function FriendsList({friends}){
 
   return <ul>
 
@@ -54,42 +75,44 @@ function Friend({friend}){
 
 
 
-function FormAddFriend(){
+function FormAddFriend({onAddFriend}){
 
-    return <form className='form-add-friend'>
+  const [name, setName] = useState("")
+  const [image, setImage] = useState("https://i.pravatar.cc/48")
+
+  function handleSubmit(e){
+    e.preventDefault();
+
+    if(!name || !image) return;
+
+    const id = crypto.randomUUID()
+    const newFriend = {
+      id: id,
+      name: name, 
+      image: `${image}?u=${id}`, 
+      balance: 0,
+    };
+
+    onAddFriend(newFriend)
+    setName("");
+    setImage("https://i.pravatar.cc/48");
+
+    
+  }
+
+    return <form className='form-add-friend' onSubmit={handleSubmit}>
       <label>🙆‍♂️Friend name</label>
-      <input type="text" />
+      <input type="text" value={name} onChange={e=>setName(e.target.value)}/>
 
       <label>⛰️Image URL</label>
-      <input type="text" />
+      <input type="text" value={image} onChange={e=>setName(e.target.value)}/>
 
       <Button>Add Friend</Button>
     </form>
 
 }
 
-function FormSplitBill(){
-  return <form className="form-split-bill">
 
-    <h2>Split a bill with X</h2>
-    <label>💰 Bill value</label>
-      <input type="text" />
-
-      <label>🤦‍♂️ Your Expense</label>
-      <input type="text" />
-
-      <label>🤦‍♀️ X's Expense</label>
-      <input type="text" disabled/>
-
-    <label > 🤷‍♂️ Who is playing the bill?</label>
-
-    <select>
-      <option value="user">You</option>
-      <option value="friend">X</option>
-    </select>
-    <Button>Add Friend</Button>
-  </form>
-}
 
 function Button({children, onClick}){
 
@@ -99,17 +122,23 @@ function Button({children, onClick}){
   
 
 function App() {
+  const [friends, setFriends] = useState(initialFriends)
   const [showAddFriend, setShowAddFriend] = useState(false)
 
   function handleShowAddFriend(){
     setShowAddFriend((show)=>!show)
   }
 
+  function handleAddFriend(friend){
+    setFriends(friends=>[...friends, friend])
+    setShowAddFriend(false)
+  }
+
   return (
     <div className='app'>
       <div className="sidebar">
-          <FriendsList />
-          {showAddFriend && <FormAddFriend />}
+          <FriendsList friends={friends}/>
+          {showAddFriend && <FormAddFriend onAddFriend = {handleAddFriend}/>}
           <Button onClick={handleShowAddFriend}> {showAddFriend ? "Close" : "Add Friend"}</Button>
       </div>
       <FormSplitBill />
